@@ -75,3 +75,14 @@ Then you can start it in the terminal by running
 php backup.php  
 ```
 The first run takes as long as a rclone sync/copy would take since the "database" which holds the date/time of the last backup for the directiers managed.
+
+### But why php?
+Quite easy: I really do like php. Easy to write and read, no speial requirements, no libs just pure php.
+
+### Was it worth it?
+Absolutely. To write (and test) this took me maybe 4 hours.  
+A standards rclone copy (or sync) on my to be backed up directories with my Cloud endpoint takes ~3 hours (f nothing changed!)  
+After the first run, which as I explained took like the regular run roughly 3 hours and my "database" was initiated, each further run takes rather seconds than minutes.  
+I use sublevel = 1 quite often, so there are 1000s of directories for which the timestamps are checked.
+ 
+
