@@ -6,11 +6,6 @@ require_once($BD . "/functions.php");
 
 
 DBLoad();
-
-print_r([$BU]);
-echo "-----------------------------------------------------------------" . PHP_EOL;
-
-
 BackupPrepare();
 
 
@@ -56,23 +51,24 @@ function BackupLaunch($WORKDIR){
         if($lastchange > $wd){ // Perform backup
 
 
-            echo "Backing up "  . $subdir . " --- " . $lastchange . PHP_EOL;
+            echo "Backing up "  . $subdir . PHP_EOL;
 
-            foreach($BU['TARGETS'] as $target){
-
+            foreach($BU['TARGETS'] as $tname => $target){
+                echo "-- on " .  $tname . PHP_EOL; 
                 if(strlen($precmd)> 0) {
                     $xx = `$precmd`;
                    // echo "precommand-result:" . $xx . PHP_EOL;
                 }
                 $command = "rclone  " . $BU['MODE']. " " . $BU['VERBOSITY'] ." " . implode(" ",$target['paras']). " ". implode(" ",$paras) . " '" . $subdir  . "' '" . $target['dir'] . $subdir  . "'";
                 $BU['db'][$subdir]['lastbackup'] = time();
-                echo $command . PHP_EOL;
+                //echo $command . PHP_EOL;
                 echo `$command`;
                 DBSave();
                 if(strlen($aftcmd)> 0){
                      $xx = `$aftcmd`;
                   //   echo "aftcommand-result:" . $xx . PHP_EOL;
-                    }
+                }
+                echo "-- on $tname done" . PHP_EOL;
 
             }
         }
