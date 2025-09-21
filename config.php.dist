@@ -1,0 +1,105 @@
+<?php
+
+/* 
+    MODE:
+    copy or sync, consult the rclone documentaton for more information. I only tested copy since I don't want to delete backups
+*/
+$BU['MODE'] = "copy";
+
+/*
+    VERBOSITY:
+    Define how loud rclone is
+    from '' to -vvvv 
+
+*/
+$BU['VERBOSITY'] = '-vvvv';
+
+/*
+    TARGETS
+    The rclone targets to where to send the files to
+    array of enpoints
+    eacho endpoint has to have to entries
+    'dir' - the action rclone directory the backup should be copied to, without tailing /
+    'paras' - an array (can be empty) of rclone copy parameters to apply to this specific entpoint
+
+*/
+
+$BU['TARGETS'] = [ 
+
+    'pc' => [
+        'dir' => 'cloud:/BackupDirectory',                              //the rclone directory it's saves to (without ending /)
+        'paras' => ['--bwlimit 175M','--multi-thread-streams=1']    //parameters which apply to this rclone endpoint
+    ],
+
+
+
+];
+
+/*
+    DIRS
+    here are the actual directories to backup defined.
+    Each entry consists of
+    'dir' - the directory to backup, without tailing /
+    'paras' - an array (can be empty) of rclone copy parameters to apply to this specific directory and subdirectories 
+    'sublevel' - a little bit special. If defines the depth for the search of directories to check for recently changed files
+            0 - starts from the given directory
+            1 to ...  starting from deeper within the tree, but doesn't copy files on the main level
+    The followinfg 2 are optional
+    'pre-cmd' - a command to execute in the shell prior to the copy process
+    'aft-cmd' - a command to execute in the shell after to the copy process is completed
+
+
+*/
+
+
+$BU['DIRS'] = [
+    //Images:
+    //Backups /data/images to cloud:/BackupDirectory/data/images
+    //rclone checks for sizes only to identify changed files
+    //My images are all in subdirectories, so I use
+    //sublevel 1, so if I add a new image (or directory) not all directorier in /data/images are copy-checked
+    "Images" => [
+        'dir' => "/data/images",
+        'paras' => ['--size-only'],
+        'sublevel' => 1,
+    ],
+
+    //Videos:
+    //Some as for images, but this time I rely on rclones fill copy-check
+    "Videos" => [
+        'dir' => "/data/videos",
+        'paras' => [],
+        'sublevel' => 1,
+    ],    
+
+    //Database:
+    //This one backups /var/lib/mysql starting from the main directory
+    //it stops mariadb (mysql server) before it performs the backup and starts the server again afterwards
+
+    "Database" => [
+        'dir' => "/var/lib/mysql",
+        'paras' => [],
+        'sublevel' => 0,
+        'pre-cmd' => 'syctemctl stop mariadb',
+        'aft-cmd' => 'syctemctl start mariadb',
+    ],    
+
+];
+
+
+/*
+    We actually check when the last change within a directory happened and save a timestamp from the last backup
+    Only if the change happened more than time_tolerance before the last backup of a directory a update will be issued
+*/
+$BU['common'] = [
+    'time_tolerance' => 10,
+];
+
+$BU['db'] = [];
+//The "database" , a simple json endoced array
+$BU['DBFILE'] = $BD . "/_backupdb.file";
+
+
+
+
+
